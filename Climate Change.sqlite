@@ -1,0 +1,63 @@
+-- Viewing state_climate table
+SELECT *
+FROM state_climate;
+
+-- Average temperature changes over time in each state
+SELECT state, year, tempc, tempf,
+AVG(tempc) OVER (PARTITION BY state ORDER BY year) AS 'running_avg_tempc', AVG(tempf) OVER (PARTITION BY state ORDER BY year) AS 'running_avg_tempf'
+FROM state_climate;
+
+-- Lowest temperature for each state
+SELECT state, year, tempc, tempf,
+FIRST_VALUE(tempc) OVER (PARTITION BY state ORDER BY tempc) AS 'lowest_tempc', FIRST_VALUE(tempf) OVER (PARTITION BY state ORDER BY tempf) AS 'lowest_tempf'
+FROM state_climate;
+
+-- Highest temperature for each state
+SELECT state, year, tempc, tempf,
+LAST_VALUE(tempc) OVER (PARTITION BY state ORDER BY tempc RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS 'highest_tempc', LAST_VALUE(tempf) OVER (PARTITION BY state ORDER BY tempf RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS 'highest_tempf'
+FROM state_climate;
+
+-- How temperature has changed each year in each state
+SELECT state, year, tempc, tempf,
+tempc - LAG(tempc, 1, tempc) OVER (PARTITION BY state ORDER BY year) AS 'change_in_tempc', tempf - LAG(tempf, 1, tempf) OVER (PARTITION BY state ORDER BY year) AS 'change_in_tempf'
+FROM state_climate;
+
+-- Rank of the coldest celsius temperatures
+SELECT state, year, tempc,
+RANK() OVER (ORDER BY tempc) AS 'coldest_rank'
+FROM state_climate;
+
+-- Rank of the coldest fahrenheit temperatures
+SELECT state, year, tempf,
+RANK() OVER (ORDER BY tempf) AS 'coldest_rank'
+FROM state_climate;
+
+-- Rank of the hottest celsius temperatures
+SELECT state, year, tempc,
+RANK() OVER (ORDER BY tempc DESC) AS 'warmest_rank'
+FROM state_climate;
+
+-- Rank of the hottest fahrenheit temperatures
+SELECT state, year, tempf,
+RANK() OVER (ORDER BY tempf DESC) AS 'warmest_rank'
+FROM state_climate;
+
+-- Average yearly celsius temperatures in quartiles
+SELECT state, year, tempc,
+NTILE(4) OVER (PARTITION BY state ORDER BY tempc) AS 'Coldest Quartile'
+FROM state_climate;
+
+-- Average yearly fahrenheit temperatures in quartiles
+SELECT state, year, tempf,
+NTILE(4) OVER (PARTITION BY state ORDER BY tempf) AS 'Coldest Quartile'
+FROM state_climate;
+
+-- Average yearly fahrenheit temperatures in quintiles
+SELECT state, year, tempf,
+NTILE(5) OVER (ORDER BY tempf) AS 'Coldest Qunitle'
+FROM state_climate;
+
+-- Average yearly celsius temperatures in quintiles
+SELECT state, year, tempc,
+NTILE(5) OVER (ORDER BY tempc) AS 'Coldest Qunitle'
+FROM state_climate;
